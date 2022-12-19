@@ -116,25 +116,30 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
 }
 
 export default class EventEdit {
+  #element = null;
+  #point = null;
+  #allDestinations = null;
+  #allOffersByType = null;
+
   constructor({point = BLANK_POINT, allOffersByType, allDestinations}) {
-    this.point = point;
-    this.allOffersByType = allOffersByType;
-    this.allDestinations = allDestinations;
+    this.#point = point;
+    this.#allOffersByType = allOffersByType;
+    this.#allDestinations = allDestinations;
   }
 
-  getTemplate() {
-    return createEventEditTemplate({point: this.point, allDestinations: this.allDestinations, allOffersByType: this.allOffersByType});
+  get template() {
+    return createEventEditTemplate({point: this.#point, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType});
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

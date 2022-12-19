@@ -54,25 +54,30 @@ function createEventItemTemplate(point, offers, destination) {
   );
 }
 export default class EventItemView {
+  #element = null;
+  #point = null;
+  #offers = null;
+  #destination = null;
+
   constructor({point, pointOffersByType, destination}) {
-    this.point = point;
-    this.offers = pointOffersByType;
-    this.destination = destination;
+    this.#point = point;
+    this.#offers = pointOffersByType;
+    this.#destination = destination;
   }
 
-  getTemplate() {
-    return createEventItemTemplate(this.point, this.offers, this.destination);
+  get template() {
+    return createEventItemTemplate(this.#point, this.#offers, this.#destination);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
