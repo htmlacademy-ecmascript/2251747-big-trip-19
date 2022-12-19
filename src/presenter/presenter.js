@@ -21,7 +21,6 @@ export default class Presenter {
   #bodyContainer;
   #pointsModel;
 
-
   constructor({boardContainer, bodyContainer, pointsModel}) {
     this.#boardContainer = boardContainer;
     this.#bodyContainer = bodyContainer;
