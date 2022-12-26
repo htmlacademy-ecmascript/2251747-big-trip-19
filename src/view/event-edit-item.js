@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const BLANK_POINT = {
   destination: null,
@@ -115,31 +115,39 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
   );
 }
 
-export default class EventEdit {
-  #element = null;
+export default class EventEdit extends AbstractView{
   #point = null;
   #allDestinations = null;
   #allOffersByType = null;
+  #arrowFormSubmit = null;
+  #arrowFormReset = null;
 
-  constructor({point = BLANK_POINT, allOffersByType, allDestinations}) {
+  constructor({point = BLANK_POINT, allOffersByType, allDestinations, onFormSubmit, onFormReset}) {
+    super();
     this.#point = point;
     this.#allOffersByType = allOffersByType;
     this.#allDestinations = allDestinations;
+    this.#arrowFormSubmit = onFormSubmit;
+    this.#arrowFormReset = onFormReset;
+
+    this.element.querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+
+    this.element.querySelector('form')
+      .addEventListener('reset', this.#formResetHandler);
   }
 
   get template() {
     return createEventEditTemplate({point: this.#point, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType});
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#arrowFormSubmit();
+  };
 
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#arrowFormReset();
+  };
 }

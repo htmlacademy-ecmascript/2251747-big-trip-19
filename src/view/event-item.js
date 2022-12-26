@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 import {getDuration, humanizeDate} from '../utils.js';
 
 function createEventItemTemplate(point, offers, destination) {
@@ -53,31 +53,29 @@ function createEventItemTemplate(point, offers, destination) {
     </li>`
   );
 }
-export default class EventItemView {
-  #element = null;
+export default class EventItemView extends AbstractView {
   #point = null;
   #offers = null;
   #destination = null;
+  #arrowEditClick = null;
 
-  constructor({point, pointOffersByType, destination}) {
+  constructor({point, pointOffersByType, destination, onEditClick}) {
+    super();
     this.#point = point;
     this.#offers = pointOffersByType;
     this.#destination = destination;
+    this.#arrowEditClick = onEditClick;
+
+    this.element.querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editClickHandler);
   }
 
   get template() {
     return createEventItemTemplate(this.#point, this.#offers, this.#destination);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#arrowEditClick();
+  };
 }
