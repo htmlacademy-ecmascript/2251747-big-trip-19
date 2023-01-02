@@ -1,5 +1,5 @@
 import { CITIES, DESCRIPTION, PICTURE_DESCRIPTIONS, WAYPOINT_TYPES } from '../const';
-import { getRandomArrayElement, getRandomElements, getRandomInt } from '../utils';
+import { getRandomArrayElement, getRandomElements, getRandomInt } from '../utils/common.js';
 
 const MIN_PIC = 0;
 const MAX_PIC = 10;
