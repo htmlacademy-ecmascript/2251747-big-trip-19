@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {getDuration, humanizeDate} from '../utils.js';
+import {getDuration, humanizeDate} from '../utils/event.js';
 
 function createEventItemTemplate(point, offers, destination) {
 

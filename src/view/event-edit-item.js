@@ -30,8 +30,8 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
   );
   const offersList = offerList.map((offer) =>
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" ${point.offers.includes(offer.id) ? 'checked' : ''}>
-      <label class="event__offer-label" for="event-offer-luggage-1">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-1" type="checkbox" name="event-offer-${offer.title}" ${point.offers.includes(offer.id) ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offer-${offer.title}-1">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${offer.price}</span>
@@ -146,8 +146,7 @@ export default class EventEdit extends AbstractView{
     this.#arrowFormSubmit();
   };
 
-  #formResetHandler = (evt) => {
-    evt.preventDefault();
+  #formResetHandler = () => {
     this.#arrowFormReset();
   };
 }

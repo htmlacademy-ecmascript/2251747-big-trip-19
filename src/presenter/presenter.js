@@ -1,16 +1,15 @@
 import BoardView from '../view/board-view.js';
-import FilterView from '../view/filter-view.js';
 import EventItemView from '../view/event-item';
-import {render} from '../framework/render.js';
+import {render, RenderPosition} from '../framework/render.js';
 import EventEdit from '../view/event-edit-item.js';
 import SortView from '../view/sort-view.js';
 import EventsListView from '../view/events-list.js';
-import { getPointOffers, getDestinationById, getOffersByType } from '../utils.js';
+import { getPointOffers, getDestinationById, getOffersByType } from '../utils/event.js';
 import ListEmptyView from '../view/list-empty.js';
+import {replace} from '../framework/render.js';
 
 export default class Presenter {
   #boardComponent = new BoardView();
-  #filterComponent = new FilterView();
   #sortComponent = new SortView();
   #eventEditComponent;
   #eventsList = new EventsListView();
@@ -66,22 +65,21 @@ export default class Presenter {
       }});
 
     function replaceCardToForm() {
-      this.#eventsList.element.replaceChild(pointEditComponent.element, pointComponent.element);
+      replace(pointEditComponent, pointComponent);
     }
 
     function replaceFormToCard() {
-      this.#eventsList.element.replaceChild(pointComponent.element, pointEditComponent.element);
+      replace(pointComponent, pointEditComponent);
     }
 
     render(pointComponent, this.#eventsList.element);
   }
 
   #renderContainer() {
-    render(this.#boardComponent, this.#boardContainer);
-    if (this.#points.every((point) => point.isArchive)) {
+    render(this.#boardComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+    if (this.#points.length === 0) {
       render(new ListEmptyView(), this.#bodyContainer);
     } else {
-      render(this.#filterComponent, this.#boardContainer,);
       render(this.#sortComponent, this.#bodyContainer);
       render(this.#eventsList, this.#bodyContainer);
 
