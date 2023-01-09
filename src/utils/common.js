@@ -18,5 +18,8 @@ function getRandomElements (sourceArray) {
   return result;
 }
 
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
 
-export {getRandomArrayElement, getRandomInt, getRandomElements};
+export {getRandomArrayElement, getRandomInt, getRandomElements, updateItem};

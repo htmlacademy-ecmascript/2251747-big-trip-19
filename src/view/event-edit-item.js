@@ -143,7 +143,7 @@ export default class EventEdit extends AbstractView{
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#arrowFormSubmit();
+    this.#arrowFormSubmit(this.#point);
   };
 
   #formResetHandler = () => {

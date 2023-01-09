@@ -1,12 +1,11 @@
 import BoardView from '../view/board-view.js';
-import EventItemView from '../view/event-item';
 import {render, RenderPosition} from '../framework/render.js';
 import EventEdit from '../view/event-edit-item.js';
 import SortView from '../view/sort-view.js';
 import EventsListView from '../view/events-list.js';
-import { getPointOffers, getDestinationById, getOffersByType } from '../utils/event.js';
 import ListEmptyView from '../view/list-empty.js';
-import {replace} from '../framework/render.js';
+import PointPresenter from './point-presenter.js';
+import {updateItem} from '../utils/common.js';
 
 export default class Presenter {
   #boardComponent = new BoardView();
@@ -19,6 +18,8 @@ export default class Presenter {
   #boardContainer;
   #bodyContainer;
   #pointsModel;
+  #noTaskComponent = new ListEmptyView();
+  #pointPresenter = new Map();
 
   constructor({boardContainer, bodyContainer, pointsModel}) {
     this.#boardContainer = boardContainer;
@@ -35,57 +36,59 @@ export default class Presenter {
     this.#renderContainer();
   }
 
-  #renderPoint(point, allOffersByType, allDestinations) {
-    const pointOffersByType = getPointOffers(point.offers, getOffersByType(point.type, allOffersByType));
-    const destination = getDestinationById(point.destination, allDestinations);
+  #handleModeChange = () => {
+    this.#pointPresenter.forEach((presenter) => presenter.resetView());
+  };
 
+  #handlePointChange = (updatedPoint) => {
+    this.#points = updateItem(this.#points, updatedPoint);
+    this.#pointPresenter.get(updatedPoint.id).init(updatedPoint, this.#allOffersByType, this.#allDestinations);
+  };
 
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceFormToCard.call(this);
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
+  #renderSort() {
+    render(this.#sortComponent, this.#bodyContainer, RenderPosition.AFTERBEGIN);
+  }
 
-    const pointComponent = new EventItemView({point, pointOffersByType, destination,
-      onEditClick: () => {
-        replaceCardToForm.call(this);
-        document.addEventListener('keydown', escKeyDownHandler);
-      }});
+  #renderPoint(point) {
+    const pointPresenter = new PointPresenter({
+      pointListContainer: this.#eventsList.element,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange
+    });
+    pointPresenter.init(point, this.#allOffersByType, this.#allDestinations);
+    this.#pointPresenter.set(point.id, pointPresenter);
+  }
 
-    const pointEditComponent = new EventEdit({point, allOffersByType, allDestinations,
-      onFormSubmit: () => {
-        replaceFormToCard.call(this);
-        document.removeEventListener('keydown', escKeyDownHandler);
-      },
-      onFormReset: () => {
-        replaceFormToCard.call(this);
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }});
+  #renderPoints(from, to) {
+    this.#points
+      .slice(from, to)
+      .forEach((point) => {
+        this.#renderPoint(point);
+      });
+  }
 
-    function replaceCardToForm() {
-      replace(pointEditComponent, pointComponent);
-    }
+  #renderNoTaskComponent() {
+    render(this.#noTaskComponent, this.#boardComponent.element, RenderPosition.AFTERBEGIN);
+  }
 
-    function replaceFormToCard() {
-      replace(pointComponent, pointEditComponent);
-    }
+  #clearPointList() {
+    this.#pointPresenter.forEach((presenter) => presenter.destroy());
+    this.#pointPresenter.clear();
+  }
 
-    render(pointComponent, this.#eventsList.element);
+  #renderPointList() {
+    render(this.#eventsList, this.#bodyContainer);
+    this.#renderPoints();
   }
 
   #renderContainer() {
     render(this.#boardComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
     if (this.#points.length === 0) {
-      render(new ListEmptyView(), this.#bodyContainer);
+      render( this.#renderNoTaskComponent(), this.#bodyContainer);
     } else {
-      render(this.#sortComponent, this.#bodyContainer);
-      render(this.#eventsList, this.#bodyContainer);
+      this.#renderPointList();
 
-      this.#points.forEach((point) => {
-        this.#renderPoint(point, this.#allOffersByType, this.#allDestinations);
-      });
     }
+    this.#renderSort();
   }
 }

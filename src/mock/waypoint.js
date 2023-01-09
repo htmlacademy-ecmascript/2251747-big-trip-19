@@ -1,5 +1,6 @@
 import { CITIES, DESCRIPTION, PICTURE_DESCRIPTIONS, WAYPOINT_TYPES } from '../const';
 import { getRandomArrayElement, getRandomElements, getRandomInt } from '../utils/common.js';
+import {nanoid} from 'nanoid';
 
 const MIN_PIC = 0;
 const MAX_PIC = 10;
@@ -176,7 +177,7 @@ const OffersByType = [
 ];
 
 
-const getRandomWaypoint = (destinationCount, i) => {
+const getRandomWaypoint = (destinationCount) => {
   const type = getRandomArrayElement(WAYPOINT_TYPES);
   const offersIds = OffersByType.find((t) => t.type === type).offers.map((offer) => offer.id);
   return {
@@ -184,11 +185,18 @@ const getRandomWaypoint = (destinationCount, i) => {
     price: getRandomInt(MIN_PRICE, MAX_PRICE),
     dateFrom: '2019-07-10T22:55:56.845Z',
     dateTo: '2019-07-11T11:22:13.375Z',
-    id: i,
+    id: nanoid(),
     isFavorite: false,
     offers: getRandomElements(offersIds),
     type: type
   };
 };
+
+/*function getRandomTask() {
+  return {
+    id: nanoid(),
+    ...getRandomArrayElement(mockTasks)
+  };
+} */
 
 export{getRandomWaypoint, OffersByType, createDestination};
