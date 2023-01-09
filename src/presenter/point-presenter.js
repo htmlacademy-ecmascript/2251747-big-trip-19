@@ -1,7 +1,7 @@
 import EventItemView from '../view/event-item.js';
 import EventEdit from '../view/event-edit-item.js';
 import {render, replace, remove} from '../framework/render.js';
-import { getPointOffers, getDestinationById, getOffersByType } from '../utils/event.js';
+import {getPointOffers, getDestinationById, getOffersByType} from '../utils/event.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',

@@ -8,6 +8,29 @@ const MAX_PIC = 10;
 const MIN_PRICE = 10;
 const MAX_PRICE = 1000;
 
+const dateMocksArray = [
+  {
+    dateFrom: '2019-07-10T22:55:56.845Z',
+    dateTo: '2019-07-11T11:22:13.375Z',
+  },
+  {
+    dateFrom: '2019-08-10T22:55:56.845Z',
+    dateTo: '2019-08-12T11:22:13.375Z',
+  },
+  {
+    dateFrom: '2019-09-10T22:55:56.845Z',
+    dateTo: '2019-09-13T11:22:13.375Z',
+  },
+  {
+    dateFrom: '2019-10-10T22:55:56.845Z',
+    dateTo: '2019-10-14T11:22:13.375Z',
+  },
+  {
+    dateFrom: '2019-11-10T22:55:56.845Z',
+    dateTo: '2019-11-15T11:22:13.375Z',
+  },
+];
+
 const createDestination = (el, index) => ({
   id: index + 1,
   description: getRandomArrayElement(DESCRIPTION),
@@ -179,24 +202,18 @@ const OffersByType = [
 
 const getRandomWaypoint = (destinationCount) => {
   const type = getRandomArrayElement(WAYPOINT_TYPES);
+  const dates = getRandomArrayElement(dateMocksArray);
   const offersIds = OffersByType.find((t) => t.type === type).offers.map((offer) => offer.id);
   return {
     destination: getRandomInt(1,destinationCount),
     price: getRandomInt(MIN_PRICE, MAX_PRICE),
-    dateFrom: '2019-07-10T22:55:56.845Z',
-    dateTo: '2019-07-11T11:22:13.375Z',
+    dateFrom: dates.dateFrom,
+    dateTo: dates.dateTo,
     id: nanoid(),
     isFavorite: false,
     offers: getRandomElements(offersIds),
     type: type
   };
 };
-
-/*function getRandomTask() {
-  return {
-    id: nanoid(),
-    ...getRandomArrayElement(mockTasks)
-  };
-} */
 
 export{getRandomWaypoint, OffersByType, createDestination};
