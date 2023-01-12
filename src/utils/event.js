@@ -40,4 +40,5 @@ function getPointOffers(pointOfferIds, offersByType) {
   return offersByType.filter((offer) => pointOfferIds.includes(offer.id));
 }
 
+
 export {humanizeDate, getDuration, getDestinationById, getOffersByType, getPointOffers, isEventFuture, isEventPresent, isEventPast};

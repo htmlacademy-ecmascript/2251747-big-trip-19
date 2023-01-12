@@ -12,6 +12,11 @@ const FilterType = {
   PRESENT: 'Present',
   PAST: 'Past',
 };
+const SortType = {
+  DAY: 'Day',
+  TIME: 'Time',
+  PRICE: 'Price',
+};
 
 
-export {WAYPOINT_TYPES, CITIES, DESCRIPTION, PICTURE_DESCRIPTIONS, FilterType};
+export {WAYPOINT_TYPES, CITIES, DESCRIPTION, PICTURE_DESCRIPTIONS, FilterType, SortType};
