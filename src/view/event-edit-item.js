@@ -1,4 +1,7 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
   destination: null,
@@ -116,6 +119,8 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
 }
 
 export default class EventEdit extends AbstractStatefulView{
+  #datepickerFrom = null;
+  #datepickerTo = null;
   #allDestinations = null;
   #allOffersByType = null;
   #arrowFormSubmit = null;
@@ -129,6 +134,20 @@ export default class EventEdit extends AbstractStatefulView{
     this.#arrowFormSubmit = onFormSubmit;
     this.#arrowFormReset = onFormReset;
     this._restoreHandlers();
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
   }
 
   reset(point) {
@@ -149,10 +168,49 @@ export default class EventEdit extends AbstractStatefulView{
 
     this.element.querySelector('form')
       .addEventListener('reset', this.#formResetHandler);
+
+    this.#setDatepicker();
   }
 
   get template() {
     return createEventEditTemplate({point: this._state, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType});
+  }
+
+  #DateFromChangeHandler = (evt) => {
+    this.updateElement({
+      dateFrom: evt[0],
+    });
+  };
+
+  #DateToChangeHandler = (evt) => {
+    this.updateElement({
+      dateFrom: evt[0],
+    });
+  };
+
+  #setDatepicker() {
+    if (this._state) {
+      // flatpickr есть смысл инициализировать только в случае,
+      // если поле выбора даты доступно для заполнения
+      this.#datepickerFrom = flatpickr(
+        this.element.querySelector(`#event-start-time-${this._state.id}`),
+        {
+          dateFormat: 'j F',
+          defaultDate: this._state.dateFrom,
+          enableTime: true,
+          onChange: this.#DateFromChangeHandler, // На событие flatpickr передаём наш колбэк
+        },
+      );
+      this.#datepickerTo = flatpickr(
+        this.element.querySelector(`#event-end-time-${this._state.id}`),
+        {
+          dateFormat: 'j F',
+          defaultDate: this._state.dateTo,
+          enableTime: true,
+          onChange: this.#DateFromChangeHandler, // На событие flatpickr передаём наш колбэк
+        },
+      );
+    }
   }
 
   static parsePointToState(point) {
