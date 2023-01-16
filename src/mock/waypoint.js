@@ -8,7 +8,7 @@ const MAX_PIC = 10;
 const MIN_PRICE = 10;
 const MAX_PRICE = 1000;
 
-const dateMocksArray = [
+const dateMocks = [
   {
     dateFrom: '2019-07-10T22:55:56.845Z',
     dateTo: '2019-07-11T11:22:13.375Z',
@@ -202,7 +202,7 @@ const OffersByType = [
 
 const getRandomWaypoint = (destinationCount) => {
   const type = getRandomArrayElement(WAYPOINT_TYPES);
-  const dates = getRandomArrayElement(dateMocksArray);
+  const dates = getRandomArrayElement(dateMocks);
   const offersIds = OffersByType.find((t) => t.type === type).offers.map((offer) => offer.id);
   return {
     destination: getRandomInt(1,destinationCount),
