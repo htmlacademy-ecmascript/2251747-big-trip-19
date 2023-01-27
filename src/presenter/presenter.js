@@ -8,12 +8,14 @@ import ListEmptyView from '../view/list-empty.js';
 import { SortType, UpdateType, UserAction, FilterType} from '../const.js';
 import { sortDay, sortTime , sortPrice,} from '../utils/sort.js';
 import {filter} from '../utils/filter.js';
+import LoadingView from '../view/loading-view.js';
 
 export default class Presenter {
   #boardComponent = new BoardView();
   #sortComponent = null;
   #eventEditComponent;
   #eventsList = new EventsListView();
+  #loadingComponent = new LoadingView();
   #allDestinations = [];
   #allOffersByType = [];
   #boardContainer;
@@ -24,6 +26,7 @@ export default class Presenter {
   #pointPresenter = new Map();
   #currentSortType = SortType.DAY;
   #filterType = FilterType.EVERYTHING;
+  #isLoading = true;
 
   constructor({boardContainer, bodyContainer, pointsModel, filterModel}) {
     this.#boardContainer = boardContainer;
@@ -33,6 +36,7 @@ export default class Presenter {
 
     this.#pointsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
+    this.#initNewEventButton();
   }
 
   get points() {
@@ -59,7 +63,6 @@ export default class Presenter {
   init() {
     this.#allDestinations = [...this.#pointsModel.destinations];
     this.#allOffersByType = [...this.#pointsModel.offersByType];
-    this.#initNewEventButton();
 
     this.#renderContainer();
   }
@@ -135,6 +138,11 @@ export default class Presenter {
         this.#clearBoard({resetSortType: true});
         this.#renderContainer();
         break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.init();
+        break;
     }
   };
 
@@ -148,11 +156,16 @@ export default class Presenter {
     this.#renderContainer();
   };
 
+  #renderLoading() {
+    render(this.#loadingComponent, this.#bodyContainer, RenderPosition.AFTERBEGIN);
+  }
+
   #clearBoard({resetSortType = false} = {}) {
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#noTaskComponent) {
       remove(this.#noTaskComponent);
@@ -188,6 +201,7 @@ export default class Presenter {
     });
   }
 
+
   #renderNoTaskComponent() {
     this.#noTaskComponent = new ListEmptyView({
       filterType: this.#filterType
@@ -198,6 +212,12 @@ export default class Presenter {
   #renderContainer() {
     render(this.#boardComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
 
+    if (this.#isLoading) {
+      render(this.#eventsList, this.#bodyContainer);
+      this.#renderLoading();
+      return;
+    }
+
     if (this.points.length === 0) {
       this.#renderNoTaskComponent();
     } else {
@@ -206,5 +226,6 @@ export default class Presenter {
 
     }
     this.#renderSort();
+    render(this.#eventsList, this.#bodyContainer);
   }
 }
