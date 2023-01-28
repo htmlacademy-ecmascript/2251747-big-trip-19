@@ -1,5 +1,6 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
+import he from 'he';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -15,7 +16,7 @@ const BLANK_POINT = {
 };
 
 
-function createEventEditTemplate({point, allOffersByType, allDestinations}) {
+function createEventEditTemplate({point, allOffersByType, allDestinations, isNew}) {
   const destination = allDestinations.find((d) => d.id === point.destination);
   const typesList = allOffersByType.map((item) => item.type);
   const offersForPointType = allOffersByType.find((o) => o.type === point.type);
@@ -29,11 +30,11 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
   );
   const citiesList = allDestinations.map((item) => item.name);
   const createEventEditCitiesListTemplete = citiesList.map((name) =>
-    `<option value="${name}"></option>`
+    `<option value="${he.encode(name)}">${he.encode(name)}</option>`
   );
   const offersList = offerList.map((offer) =>
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}" ${point.offers.includes(offer.id) ? 'checked' : ''}>
+      <input class="event__offer-checkbox visually-hidden" id="event-offer-${offer.title}-${point.id}" type="checkbox" name="event-offer-${offer.title}" ${point.offers.includes(offer.id) ? 'checked' : ''} value="${offer.id}">
       <label class="event__offer-label" for="event-offer-${offer.title}-${point.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -87,11 +88,11 @@ function createEventEditTemplate({point, allOffersByType, allDestinations}) {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${point.id}" type="text" name="event-price" value="${point.price || ''}">
+          <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price || ''}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">${isNew ? 'Cancel' : 'Delete'}</button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -125,14 +126,18 @@ export default class EventEdit extends AbstractStatefulView{
   #allOffersByType = null;
   #arrowFormSubmit = null;
   #arrowFormReset = null;
+  #handleDeleteClick = null;
+  #isNew = null;
 
-  constructor({point = BLANK_POINT, allOffersByType, allDestinations, onFormSubmit, onFormReset}) {
+  constructor({point = BLANK_POINT, allOffersByType, allDestinations, onFormSubmit, onFormReset, onDeleteClick}) {
     super();
     this._setState(EventEdit.parsePointToState(point));
     this.#allOffersByType = allOffersByType;
     this.#allDestinations = allDestinations;
     this.#arrowFormSubmit = onFormSubmit;
     this.#arrowFormReset = onFormReset;
+    this.#handleDeleteClick = onDeleteClick;
+    this.#isNew = point.id === null;
     this._restoreHandlers();
   }
 
@@ -152,7 +157,7 @@ export default class EventEdit extends AbstractStatefulView{
 
   reset(point) {
     this.updateElement(
-      EventEdit.parsePointToState(point),
+      EventEdit.parsePointToState(point || BLANK_POINT),
     );
   }
 
@@ -160,8 +165,13 @@ export default class EventEdit extends AbstractStatefulView{
     this.element.querySelectorAll('.event__type-input').forEach((element) => {
       element.addEventListener('click', this.#typeChangeHandler);
     });
+    this.element.querySelectorAll('.event__offer-selector').forEach((element) => {
+      element.addEventListener('click', this.#offersChangeHandler);
+    });
 
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
+
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
 
     this.element.querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -173,7 +183,7 @@ export default class EventEdit extends AbstractStatefulView{
   }
 
   get template() {
-    return createEventEditTemplate({point: this._state, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType});
+    return createEventEditTemplate({point: this._state, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType, isNew: this.#isNew});
   }
 
   #DateFromChangeHandler = (evt) => {
@@ -184,21 +194,19 @@ export default class EventEdit extends AbstractStatefulView{
 
   #DateToChangeHandler = (evt) => {
     this.updateElement({
-      dateFrom: evt[0],
+      dateTo: evt[0],
     });
   };
 
   #setDatepicker() {
     if (this._state) {
-      // flatpickr есть смысл инициализировать только в случае,
-      // если поле выбора даты доступно для заполнения
       this.#datepickerFrom = flatpickr(
         this.element.querySelector(`#event-start-time-${this._state.id}`),
         {
           dateFormat: 'j F',
           defaultDate: this._state.dateFrom,
           enableTime: true,
-          onChange: this.#DateFromChangeHandler, // На событие flatpickr передаём наш колбэк
+          onChange: this.#DateFromChangeHandler,
         },
       );
       this.#datepickerTo = flatpickr(
@@ -207,7 +215,7 @@ export default class EventEdit extends AbstractStatefulView{
           dateFormat: 'j F',
           defaultDate: this._state.dateTo,
           enableTime: true,
-          onChange: this.#DateFromChangeHandler, // На событие flatpickr передаём наш колбэк
+          onChange: this.#DateToChangeHandler,
         },
       );
     }
@@ -221,10 +229,28 @@ export default class EventEdit extends AbstractStatefulView{
     return {...state};
   }
 
+  #offersChangeHandler = (evt) => {
+    if (evt.target.className !== 'event__offer-checkbox visually-hidden') {
+      return;
+    }
+    const selectedId = Number(evt.target.value);
+    const newOffers = evt.target.checked ? [...this._state.offers, selectedId] : this._state.offers.filter((offerId) => offerId !== selectedId);
+    this.updateElement({
+      offers: newOffers
+    });
+  };
+
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement({
       destination: this.#allDestinations.find((d) => d.name === evt.target.value).id
+    });
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      price: evt.target.value
     });
   };
 
@@ -235,12 +261,18 @@ export default class EventEdit extends AbstractStatefulView{
     });
   };
 
-  #formSubmitHandler = () => {
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
     this.#arrowFormSubmit(this._state);
   };
 
-  #formResetHandler = () => {
-    this.#arrowFormReset();
+  #formResetHandler = (evt) => {
+    evt.preventDefault();
+    if (this.#isNew) {
+      this.#arrowFormReset();
+    } else {
+      this.#handleDeleteClick(this._state);
+    }
   };
 
 }
