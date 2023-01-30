@@ -26,22 +26,22 @@ export default class FilterPresenter {
       {
         type: FilterType.EVERYTHING,
         name: 'Everything',
-        count: filter[FilterType.EVERYTHING](events),
+        count: filter[FilterType.EVERYTHING](events).length,
       },
       {
         type: FilterType.FUTURE,
         name: 'Future',
-        count: filter[FilterType.FUTURE](events),
+        count: filter[FilterType.FUTURE](events).length,
       },
       {
         type: FilterType.PRESENT,
         name: 'Present',
-        count: filter[FilterType.PRESENT](events),
+        count: filter[FilterType.PRESENT](events).length,
       },
       {
         type: FilterType.PAST,
         name: 'Past',
-        count: filter[FilterType.PAST](events),
+        count: filter[FilterType.PAST](events).length,
       },
     ];
   }

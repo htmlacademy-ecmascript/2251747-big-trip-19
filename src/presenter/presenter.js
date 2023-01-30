@@ -6,7 +6,7 @@ import PointPresenter from './point-presenter.js';
 import SortView from '../view/sort-view.js';
 import ListEmptyView from '../view/list-empty.js';
 import { SortType, UpdateType, UserAction, FilterType} from '../const.js';
-import { sortDay, sortTime , sortPrice,} from '../utils/sort.js';
+import { sortDateFrom, sortTime , sortPrice,} from '../utils/sort.js';
 import {filter} from '../utils/filter.js';
 import LoadingView from '../view/loading-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
@@ -55,7 +55,7 @@ export default class Presenter {
 
     switch (this.#currentSortType) {
       case SortType.DAY:
-        return filteredPoints.sort(sortDay);
+        return filteredPoints.sort(sortDateFrom);
       case SortType.TIME:
         return filteredPoints.sort(sortTime);
       case SortType.PRICE:
@@ -237,8 +237,17 @@ export default class Presenter {
     render(this.#noTaskComponent, this.#bodyContainer, RenderPosition.AFTERBEGIN);
   }
 
-  #renderContainer() {
+  #renderBoard() {
+    remove(this.#boardComponent);
+    this.#boardComponent = new BoardView(this.points.map( (point) => ({
+      ...point,
+      name: this.#allDestinations.find((destination) => destination.id === point.destination).name
+    })));
     render(this.#boardComponent, this.#boardContainer, RenderPosition.AFTERBEGIN);
+  }
+
+  #renderContainer() {
+    this.#renderBoard();
 
     if (this.#isLoading) {
       render(this.#eventsList, this.#bodyContainer);
