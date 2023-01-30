@@ -16,7 +16,7 @@ const BLANK_POINT = {
 };
 
 
-function createEventEditTemplate({point, allOffersByType, allDestinations, isNew}) {
+function createEventEditTemplate({point, allOffersByType, allDestinations, isNew,}) {
   const destination = allDestinations.find((d) => d.id === point.destination);
   const typesList = allOffersByType.map((item) => item.type);
   const offersForPointType = allOffersByType.find((o) => o.type === point.type);
@@ -46,6 +46,13 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
   const createEventEditPicListTemplete = picturesList.map((picture) =>
     `<img class="event__photo" src="${picture.src}" alt="Event photo">`
   );
+
+  let resetButtonText;
+  if (isNew) {
+    resetButtonText = 'Cancel';
+  } else {
+    resetButtonText = point.isDeleting ? 'Deleting...' : 'Delete';
+  }
   return (
     `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -91,8 +98,8 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
           <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price || ''}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">${isNew ? 'Cancel' : 'Delete'}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit">${point.isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset">${resetButtonText}</button>
       </header>
       <section class="event__details">
         <section class="event__section  event__section--offers">
@@ -222,11 +229,17 @@ export default class EventEdit extends AbstractStatefulView{
   }
 
   static parsePointToState(point) {
-    return {...point};
+    return {...point,
+      isSaving: false,
+      isDeleting: false,
+    };
   }
 
   static parseStateToPoint(state) {
-    return {...state};
+    const point = {...state};
+    delete point.isSaving;
+    delete point.isDeleting;
+    return point;
   }
 
   #offersChangeHandler = (evt) => {
@@ -250,7 +263,7 @@ export default class EventEdit extends AbstractStatefulView{
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
     this.updateElement({
-      price: evt.target.value
+      price: Number(evt.target.value)
     });
   };
 
