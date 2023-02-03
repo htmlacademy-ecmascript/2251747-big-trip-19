@@ -1,14 +1,13 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
-
 import 'flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
   destination: null,
   price: null,
-  dateFrom: null,
-  dateTo: null,
+  dateFrom: new Date(),
+  dateTo: new Date(),
   id: null,
   isFavorite: false,
   offers: [],
@@ -16,20 +15,20 @@ const BLANK_POINT = {
 };
 
 
-function createEventEditTemplate({point, allOffersByType, allDestinations, isNew,}) {
+function createPointEditTemplate({point, allOffersByType, allDestinations, isNew,}) {
   const destination = allDestinations.find((d) => d.id === point.destination);
   const typesList = allOffersByType.map((item) => item.type);
   const offersForPointType = allOffersByType.find((o) => o.type === point.type);
   const offerList = offersForPointType ? offersForPointType.offers : [];
 
-  const createEventEditTypeListTemplete = typesList.map((type) =>
+  const createTypeListTemplete = typesList.map((type) =>
     `<div class="event__type-item">
     <input id="event-type-${type.toLowerCase()}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === point.type ? 'checked' : ''}>
     <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-${point.id}">${type}</label>
     </div>`
   );
   const citiesList = allDestinations.map((item) => item.name);
-  const createEventEditCitiesListTemplete = citiesList.map((name) =>
+  const createCitiesListTemplete = citiesList.map((name) =>
     `<option value="${he.encode(name)}">${he.encode(name)}</option>`
   );
   const offersList = offerList.map((offer) =>
@@ -43,7 +42,7 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
     </div>`
   );
   const picturesList = destination ? destination.pictures : [];
-  const createEventEditPicListTemplete = picturesList.map((picture) =>
+  const createPicListTemplete = picturesList.map((picture) =>
     `<img class="event__photo" src="${picture.src}" alt="Event photo">`
   );
 
@@ -62,12 +61,12 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type.toLowerCase()}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${point.id}" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${point.id}" type="checkbox" >
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-                ${createEventEditTypeListTemplete.join('')}
+                ${createTypeListTemplete.join('')}
             </fieldset>
           </div>
         </div>
@@ -76,18 +75,18 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
           <label class="event__label  event__type-output" for="event-destination-${point.id}">
             ${point.type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${allDestinations.find((dest) => dest.id === point.destination)?.name || ''}" list="destination-list-${point.id}">
+          <input class="event__input  event__input--destination" id="event-destination-${point.id}" type="text" name="event-destination" value="${allDestinations.find((dest) => dest.id === point.destination)?.name || ''}" list="destination-list-${point.id}" required>
           <datalist id="destination-list-${point.id}">
-            ${createEventEditCitiesListTemplete.join('')}
+            ${createCitiesListTemplete.join('')}
           </datalist>
         </div>
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${point.id}">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${point.dateFrom || ''}">
+          <input class="event__input  event__input--time" id="event-start-time-${point.id}" type="text" name="event-start-time" value="${point.dateFrom || ''}" required>
           &mdash;
           <label class="visually-hidden" for="event-end-time-${point.id}">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${point.dateTo || ''}">
+          <input class="event__input  event__input--time" id="event-end-time-${point.id}" type="text" name="event-end-time" value="${point.dateTo || ''}" required>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -95,7 +94,7 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price || ''}">
+          <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price}" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">${point.isSaving ? 'Saving...' : 'Save'}</button>
@@ -116,7 +115,7 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              ${createEventEditPicListTemplete.join('')}
+              ${createPicListTemplete.join('')}
             </div>
           </div>
         </section>
@@ -126,7 +125,7 @@ function createEventEditTemplate({point, allOffersByType, allDestinations, isNew
   );
 }
 
-export default class EventEdit extends AbstractStatefulView{
+export default class PointEdit extends AbstractStatefulView{
   #datepickerFrom = null;
   #datepickerTo = null;
   #allDestinations = null;
@@ -138,7 +137,7 @@ export default class EventEdit extends AbstractStatefulView{
 
   constructor({point = BLANK_POINT, allOffersByType, allDestinations, onFormSubmit, onFormReset, onDeleteClick}) {
     super();
-    this._setState(EventEdit.parsePointToState(point));
+    this._setState(PointEdit.parsePointToState(point));
     this.#allOffersByType = allOffersByType;
     this.#allDestinations = allDestinations;
     this.#arrowFormSubmit = onFormSubmit;
@@ -146,6 +145,10 @@ export default class EventEdit extends AbstractStatefulView{
     this.#handleDeleteClick = onDeleteClick;
     this.#isNew = point.id === null;
     this._restoreHandlers();
+  }
+
+  get template() {
+    return createPointEditTemplate({point: this._state, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType, isNew: this.#isNew});
   }
 
   removeElement() {
@@ -164,7 +167,7 @@ export default class EventEdit extends AbstractStatefulView{
 
   reset(point) {
     this.updateElement(
-      EventEdit.parsePointToState(point || BLANK_POINT),
+      PointEdit.parsePointToState(point || BLANK_POINT),
     );
   }
 
@@ -189,17 +192,14 @@ export default class EventEdit extends AbstractStatefulView{
     this.#setDatepicker();
   }
 
-  get template() {
-    return createEventEditTemplate({point: this._state, allDestinations: this.#allDestinations, allOffersByType: this.#allOffersByType, isNew: this.#isNew});
-  }
-
-  #DateFromChangeHandler = (evt) => {
+  #dateFromChangeHandler = (evt) => {
     this.updateElement({
       dateFrom: evt[0],
     });
+    this.#datepickerTo.minDate = evt[0];
   };
 
-  #DateToChangeHandler = (evt) => {
+  #dateToChangeHandler = (evt) => {
     this.updateElement({
       dateTo: evt[0],
     });
@@ -213,7 +213,7 @@ export default class EventEdit extends AbstractStatefulView{
           dateFormat: 'j F',
           defaultDate: this._state.dateFrom,
           enableTime: true,
-          onChange: this.#DateFromChangeHandler,
+          onChange: this.#dateFromChangeHandler,
         },
       );
       this.#datepickerTo = flatpickr(
@@ -222,7 +222,8 @@ export default class EventEdit extends AbstractStatefulView{
           dateFormat: 'j F',
           defaultDate: this._state.dateTo,
           enableTime: true,
-          onChange: this.#DateToChangeHandler,
+          minDate: this._state.dateFrom,
+          onChange: this.#dateToChangeHandler,
         },
       );
     }

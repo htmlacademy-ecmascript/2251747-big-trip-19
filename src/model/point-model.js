@@ -16,6 +16,14 @@ export default class PointModel extends Observable{
     return this.#points;
   }
 
+  get destinations() {
+    return this.#destinations;
+  }
+
+  get offersByType() {
+    return this.#offers;
+  }
+
   async init() {
     try {
       const points = await this.#pointsApiService.points;
@@ -80,14 +88,6 @@ export default class PointModel extends Observable{
     } catch(err) {
       throw new Error('Can\'t delete point');
     }
-  }
-
-  get destinations() {
-    return this.#destinations;
-  }
-
-  get offersByType() {
-    return this.#offers;
   }
 
   #adaptToClient(point) {

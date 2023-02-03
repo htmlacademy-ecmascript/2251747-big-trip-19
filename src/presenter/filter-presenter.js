@@ -15,33 +15,33 @@ export default class FilterPresenter {
     this.#filterModel = filterModel;
     this.#pointsModel = pointsModel;
 
-    this.#pointsModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
+    this.#pointsModel.addObserver(this.#handleModelPoint);
+    this.#filterModel.addObserver(this.#handleModelPoint);
   }
 
   get filters() {
-    const events = this.#pointsModel.points;
+    const points = this.#pointsModel.points;
 
     return [
       {
         type: FilterType.EVERYTHING,
         name: 'Everything',
-        count: filter[FilterType.EVERYTHING](events).length,
+        count: filter[FilterType.EVERYTHING](points).length,
       },
       {
         type: FilterType.FUTURE,
         name: 'Future',
-        count: filter[FilterType.FUTURE](events).length,
+        count: filter[FilterType.FUTURE](points).length,
       },
       {
         type: FilterType.PRESENT,
         name: 'Present',
-        count: filter[FilterType.PRESENT](events).length,
+        count: filter[FilterType.PRESENT](points).length,
       },
       {
         type: FilterType.PAST,
         name: 'Past',
-        count: filter[FilterType.PAST](events).length,
+        count: filter[FilterType.PAST](points).length,
       },
     ];
   }
@@ -65,7 +65,7 @@ export default class FilterPresenter {
     remove(prevFilterComponent);
   }
 
-  #handleModelEvent = () => {
+  #handleModelPoint = () => {
     this.init();
   };
 
