@@ -4,21 +4,32 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-const DATE_FORMAT = 'D MMMM';
+const DATE_FORMAT_HM = 'HH[:]mm';
+const DATE_FORMAT_MD = 'MMM D';
 
-function humanizeDate(date) {
-  return date ? dayjs(date).format(DATE_FORMAT) : '';
+function humanizeDateHM(date) {
+  return date ? dayjs(date).format(DATE_FORMAT_HM) : '';
 }
 
-function isEventPresent(dateFrom, dateTo) {
+function humanizeDateMD(date) {
+  return date ? dayjs(date).format(DATE_FORMAT_MD) : '';
+}
+
+function durationMinimized (dateFrom, dateTo) {
+  const to = dayjs(dateFrom);
+  const from = dayjs(dateTo);
+  return dayjs.duration(from.diff(to)).format('D[D] HH[H] mm[M]');
+}
+
+function isPointPresent(dateFrom, dateTo) {
   return (dayjs(dateFrom).isSame(dayjs(), 'D') || dayjs(dateFrom).isBefore(dayjs(), 'D')) && (dayjs(dateTo).isSame(dayjs(), 'D') || dayjs(dateTo).isAfter(dayjs(), 'D'));
 }
 
-function isEventFuture(date) {
+function isPointFuture(date) {
   return date && dayjs(date).isAfter(dayjs(), 'D');
 }
 
-function isEventPast(date) {
+function isPointPast(date) {
   return date && dayjs(date).isBefore(dayjs(), 'D');
 }
 
@@ -41,4 +52,4 @@ function getPointOffers(pointOfferIds, offersByType) {
 }
 
 
-export {humanizeDate, getDuration, getDestinationById, getOffersByType, getPointOffers, isEventFuture, isEventPresent, isEventPast};
+export {humanizeDateHM, humanizeDateMD, getDuration, getDestinationById, getOffersByType, getPointOffers, isPointFuture, isPointPresent, isPointPast, durationMinimized};

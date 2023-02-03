@@ -1,7 +1,7 @@
-import EventItemView from '../view/event-item.js';
-import EventEdit from '../view/event-edit-item.js';
+import PointItemView from '../view/point-item.js';
+import PointEdit from '../view/point-edit-item.js';
 import {render, replace, remove} from '../framework/render.js';
-import {getPointOffers, getDestinationById, getOffersByType} from '../utils/event.js';
+import {getPointOffers, getDestinationById, getOffersByType} from '../utils/point.js';
 import { UpdateType, UserAction } from '../const.js';
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -12,6 +12,7 @@ export default class PointPresenter {
   #pointListContainer = null;
   #handleDataChange = null;
   #handleModeChange = null;
+  #handlePointOpen = null;
 
   #pointComponent = null;
   #pointEditComponent = null;
@@ -23,10 +24,11 @@ export default class PointPresenter {
   #pointOffersByType ;
   #destination ;
 
-  constructor({pointListContainer, onDataChange, onModeChange}) {
+  constructor({pointListContainer, onDataChange, onModeChange, onPointOpen}) {
     this.#pointListContainer = pointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
+    this.#handlePointOpen = onPointOpen;
   }
 
   init(point, allOffersByType, allDestinations) {
@@ -40,7 +42,7 @@ export default class PointPresenter {
     const prevPointComponent = this.#pointComponent;
     const prevPointEditComponent = this.#pointEditComponent;
 
-    this.#pointComponent = new EventItemView({
+    this.#pointComponent = new PointItemView({
       point: this.#point,
       pointOffersByType: this.#pointOffersByType,
       destination: this.#destination,
@@ -48,7 +50,7 @@ export default class PointPresenter {
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
-    this.#pointEditComponent = new EventEdit({
+    this.#pointEditComponent = new PointEdit({
       point: this.#point,
       allOffersByType: this.#allOffersByType,
       allDestinations: this.#allDestinations,
@@ -137,13 +139,15 @@ export default class PointPresenter {
 
   #arrowEditClick = () => {
     this.#replaceCardToForm();
+    this.#handlePointOpen();
   };
 
   #handleFavoriteClick = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
-      {...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#handleDataChange({
+      actionType: UserAction.UPDATE_POINT,
+      updateType: UpdateType.MINOR,
+      update: {...this.#point, isFavorite: !this.#point.isFavorite}
+    });
   };
 
   #arrowFormSubmit = (update) => {

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 
 function sortDateFrom(pointA, pointB) {
-  return dayjs(pointB.dateFrom).valueOf() - dayjs(pointA.dateFrom).valueOf();
+  return dayjs(pointA.dateFrom).valueOf() - dayjs(pointB.dateFrom).valueOf();
 }
 
 function sortDateTo(pointA, pointB) {
