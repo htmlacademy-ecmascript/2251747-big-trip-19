@@ -119,7 +119,7 @@ export default class Presenter {
   };
 
   #showNewPointForm = () => {
-    render(this.#pointEditComponent, this.#bodyContainer, RenderPosition.AFTERBEGIN);
+    render(this.#pointEditComponent, this.#pointsListComponent.element, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#escKeyDownHandler);
     this.#handleModeChange();
   };
@@ -161,6 +161,7 @@ export default class Presenter {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#pointPresenter.get(data.id).init(data, this.#allOffersByType, this.#allDestinations);
+        this.#clearBoard();
         this.#renderContainer();
         break;
       case UpdateType.MINOR:

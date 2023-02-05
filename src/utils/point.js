@@ -18,7 +18,7 @@ function humanizeDateMD(date) {
 function durationMinimized (dateFrom, dateTo) {
   const to = dayjs(dateFrom);
   const from = dayjs(dateTo);
-  return dayjs.duration(from.diff(to)).format('D[D] HH[H] mm[M]');
+  return dayjs.duration(from.diff(to)).format('D[D] HH[H] mm[M]').replace('0D ', '').replace('00H ', '').replace('00M', '');
 }
 
 function isPointPresent(dateFrom, dateTo) {

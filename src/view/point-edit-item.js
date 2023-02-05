@@ -2,6 +2,7 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
+import dayjs from 'dayjs';
 
 const BLANK_POINT = {
   destination: null,
@@ -11,7 +12,7 @@ const BLANK_POINT = {
   id: null,
   isFavorite: false,
   offers: [],
-  type: 'Taxi'
+  type: 'taxi'
 };
 
 
@@ -21,10 +22,12 @@ function createPointEditTemplate({point, allOffersByType, allDestinations, isNew
   const offersForPointType = allOffersByType.find((o) => o.type === point.type);
   const offerList = offersForPointType ? offersForPointType.offers : [];
 
+  const capitalizeFirstLetter = (string) => (string.charAt(0).toUpperCase() + string.slice(1));
+
   const createTypeListTemplete = typesList.map((type) =>
     `<div class="event__type-item">
-    <input id="event-type-${type.toLowerCase()}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === point.type ? 'checked' : ''}>
-    <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-${point.id}">${type}</label>
+    <input id="event-type-${type}-${point.id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${type === point.type ? 'checked' : ''}>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${point.id}">${capitalizeFirstLetter(type)}</label>
     </div>`
   );
   const citiesList = allDestinations.map((item) => item.name);
@@ -193,10 +196,16 @@ export default class PointEdit extends AbstractStatefulView{
   }
 
   #dateFromChangeHandler = (evt) => {
+    const date = evt[0];
     this.updateElement({
-      dateFrom: evt[0],
+      dateFrom: date,
     });
-    this.#datepickerTo.minDate = evt[0];
+    this.#datepickerTo.minDate = date;
+    if (dayjs(this._state.dateTo).isBefore(date)) {
+      this.updateElement({
+        dateTo: date
+      });
+    }
   };
 
   #dateToChangeHandler = (evt) => {
@@ -210,7 +219,7 @@ export default class PointEdit extends AbstractStatefulView{
       this.#datepickerFrom = flatpickr(
         this.element.querySelector(`#event-start-time-${this._state.id}`),
         {
-          dateFormat: 'j F',
+          dateFormat: 'j/m/y H:i',
           defaultDate: this._state.dateFrom,
           enableTime: true,
           onChange: this.#dateFromChangeHandler,
@@ -219,7 +228,7 @@ export default class PointEdit extends AbstractStatefulView{
       this.#datepickerTo = flatpickr(
         this.element.querySelector(`#event-end-time-${this._state.id}`),
         {
-          dateFormat: 'j F',
+          dateFormat: 'j/m/y H:i',
           defaultDate: this._state.dateTo,
           enableTime: true,
           minDate: this._state.dateFrom,
