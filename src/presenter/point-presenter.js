@@ -90,9 +90,11 @@ export default class PointPresenter {
   }
 
   setSaving() {
-    this.#pointEditComponent.updateElement({
-      isSaving: true,
-    });
+    if (this.#pointEditComponent.elment) {
+      this.#pointEditComponent.updateElement({
+        isSaving: true,
+      });
+    }
   }
 
   setDeleting() {

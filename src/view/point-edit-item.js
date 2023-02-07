@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 const BLANK_POINT = {
   destination: null,
-  price: null,
+  price: 0,
   dateFrom: new Date(),
   dateTo: new Date(),
   id: null,
@@ -97,7 +97,7 @@ function createPointEditTemplate({point, allOffersByType, allDestinations, isNew
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price}" required>
+          <input class="event__input  event__input--price" id="event-price-${point.id}" type="number" name="event-price" value="${point.price || ''}" min="1" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">${point.isSaving ? 'Saving...' : 'Save'}</button>
@@ -197,19 +197,19 @@ export default class PointEdit extends AbstractStatefulView{
 
   #dateFromChangeHandler = (evt) => {
     const date = evt[0];
-    this.updateElement({
+    this._setState({
       dateFrom: date,
     });
     this.#datepickerTo.minDate = date;
     if (dayjs(this._state.dateTo).isBefore(date)) {
-      this.updateElement({
+      this._setState({
         dateTo: date
       });
     }
   };
 
   #dateToChangeHandler = (evt) => {
-    this.updateElement({
+    this._setState({
       dateTo: evt[0],
     });
   };
@@ -258,21 +258,21 @@ export default class PointEdit extends AbstractStatefulView{
     }
     const selectedId = Number(evt.target.value);
     const newOffers = evt.target.checked ? [...this._state.offers, selectedId] : this._state.offers.filter((offerId) => offerId !== selectedId);
-    this.updateElement({
+    this._setState({
       offers: newOffers
     });
   };
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({
+    this._setState({
       destination: this.#allDestinations.find((d) => d.name === evt.target.value).id
     });
   };
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({
+    this._setState({
       price: Number(evt.target.value)
     });
   };
